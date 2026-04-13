@@ -37,6 +37,14 @@ export default function Invoices() {
 
   useEffect(() => { load() }, [filterBayar])
 
+  // Saat dialog dibuka, jika ada order selesai langsung load estimasi order pertama
+  useEffect(() => {
+    if (addOpen && selesaiOrders.length > 0 && !form.order_id) {
+      const firstId = String(selesaiOrders[0].id)
+      handleOrderChange(firstId)
+    }
+  }, [addOpen, selesaiOrders])
+
   const handleOrderChange = async (orderId) => {
     setForm(f => ({ ...f, order_id: orderId }))
     if (!orderId) { setEst(null); return }
@@ -154,16 +162,21 @@ export default function Invoices() {
           <DialogHeader><DialogTitle>Buat Invoice Baru</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <FormField label="Order (status: Selesai)" required>
-              <Select value={form.order_id} onValueChange={handleOrderChange}>
-                <SelectTrigger><SelectValue placeholder="Pilih order selesai..." /></SelectTrigger>
-                <SelectContent>
-                  {selesaiOrders.map(o => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.no_order} — {o.customer_nama}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                style={{ width:'100%', height:'36px', padding:'0 12px', borderRadius:'6px', border:'1px solid hsl(240 5.9% 90%)', background:'hsl(0 0% 100%)', fontSize:'14px', color:'hsl(240 10% 3.9%)', outline:'none', cursor:'pointer' }}
+                value={form.order_id}
+                onChange={e => handleOrderChange(e.target.value)}
+              >
+                <option value="">-- Pilih Order Selesai --</option>
+                {selesaiOrders.map(o => (
+                  <option key={o.id} value={String(o.id)}>
+                    {o.no_order} — {o.customer_nama}
+                  </option>
+                ))}
+              </select>
+              {selesaiOrders.length === 0 && (
+                <p className="text-xs text-amber-600 mt-1">Belum ada order dengan status Selesai.</p>
+              )}
             </FormField>
 
             {estimasiPreview && (
@@ -193,19 +206,20 @@ export default function Invoices() {
             </FormField>
 
             <FormField label="Metode Pembayaran" required>
-              <Select value={form.metode_bayar} onValueChange={v => setForm(f => ({ ...f, metode_bayar: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tunai">Tunai</SelectItem>
-                  <SelectItem value="transfer">Transfer Bank</SelectItem>
-                  <SelectItem value="qris">QRIS</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                style={{ width:'100%', height:'36px', padding:'0 12px', borderRadius:'6px', border:'1px solid hsl(240 5.9% 90%)', background:'hsl(0 0% 100%)', fontSize:'14px', color:'hsl(240 10% 3.9%)', outline:'none', cursor:'pointer' }}
+                value={form.metode_bayar}
+                onChange={e => setForm(f => ({ ...f, metode_bayar: e.target.value }))}
+              >
+                <option value="tunai">Tunai</option>
+                <option value="transfer">Transfer Bank</option>
+                <option value="qris">QRIS</option>
+              </select>
             </FormField>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setAddOpen(false); setEst(null) }}>Batal</Button>
-            <Button onClick={handleCreate} disabled={saving || !estimasiPreview}>
+            <Button onClick={handleCreate} disabled={saving}>
               {saving && <Spinner className="h-4 w-4" />}{saving ? 'Menyimpan...' : 'Buat Invoice'}
             </Button>
           </DialogFooter>

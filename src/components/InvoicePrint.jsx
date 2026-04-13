@@ -4,6 +4,7 @@ import { Button } from '@/components/ui'
 import { formatRupiah } from '@/lib/utils'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
+import logoImg from '../logo.png'
 
 export default function InvoicePrint({ invoice, order, estimasi, onClose }) {
   const printRef = useRef()
@@ -25,8 +26,8 @@ export default function InvoicePrint({ invoice, order, estimasi, onClose }) {
           /* Header */
           .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 24px; border-bottom: 2px solid #1d4ed8; margin-bottom: 28px; }
           .brand { display: flex; align-items: center; gap: 12px; }
-          .brand-icon { width: 44px; height: 44px; background: #1d4ed8; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-          .brand-icon svg { width: 22px; height: 22px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; }
+          // .brand-icon { width: 44px; height: 44px; background: #1d4ed8; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+          .brand-icon img { width: 22px; height: 22px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; }
           .brand-name { font-size: 22px; font-weight: 700; color: #1d4ed8; line-height: 1; }
           .brand-sub  { font-size: 11px; color: #64748b; margin-top: 3px; }
           .invoice-meta { text-align: right; }
@@ -108,11 +109,9 @@ export default function InvoicePrint({ invoice, order, estimasi, onClose }) {
           {/* Header */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', paddingBottom:'20px', borderBottom:'2px solid #1d4ed8', marginBottom:'24px' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-              <div style={{ width:'42px', height:'42px', background:'#1d4ed8', borderRadius:'10px', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                </svg>
-              </div>
+              {/* <div style={{ width:'42px', height:'42px', background:'#1d4ed8', borderRadius:'10px', display:'flex', alignItems:'center', justifyContent:'center' }}> */}
+                <img src={logoImg} alt="Logo PISIRA" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
+              {/* </div> */}
               <div>
                 <div style={{ fontSize:'20px', fontWeight:'700', color:'#1d4ed8', lineHeight:1 }}>PISIRA</div>
                 <div style={{ fontSize:'11px', color:'#64748b', marginTop:'3px' }}>Service Laptop Profesional</div>
