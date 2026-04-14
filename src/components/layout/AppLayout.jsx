@@ -7,10 +7,11 @@ export default function AppLayout() {
   if (!user) return <Navigate to="/login" replace />
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="ml-[220px] flex-1">
-        <div className="mx-auto max-w-5xl px-6 py-7 animate-fade-in">
+      {/* Desktop: margin kiri untuk sidebar. Mobile: padding atas untuk header */}
+      <main className="md:ml-[220px] pt-14 md:pt-0">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-5 md:py-7 animate-fade-in">
           <Outlet />
         </div>
       </main>

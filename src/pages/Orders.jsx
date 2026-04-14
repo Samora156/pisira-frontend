@@ -15,7 +15,7 @@ const STATUSES = [
   { value: '',                     label: 'Semua' },
   { value: 'menunggu',             label: 'Menunggu' },
   { value: 'diagnosa',             label: 'Diagnosa' },
-  { value: 'menunggu_persetujuan', label: 'Tunggu Persetujuan' },
+  { value: 'menunggu_persetujuan', label: 'Persetujuan' },
   { value: 'proses',               label: 'Diproses' },
   { value: 'selesai',              label: 'Selesai' },
   { value: 'diambil',              label: 'Diambil' },
@@ -24,19 +24,7 @@ const STATUSES = [
 
 const EMPTY_ORDER  = { customer_id: '', merk_laptop: '', model_laptop: '', sn_laptop: '', keluhan: '' }
 const EMPTY_STATUS = { status: '', diagnosa: '', catatan_teknisi: '' }
-
-const nativeSelectStyle = {
-  width: '100%',
-  height: '36px',
-  padding: '0 12px',
-  borderRadius: '6px',
-  border: '1px solid hsl(240 5.9% 90%)',
-  background: 'hsl(0 0% 100%)',
-  fontSize: '14px',
-  color: 'hsl(240 10% 3.9%)',
-  outline: 'none',
-  cursor: 'pointer',
-}
+const selectStyle  = { width:'100%', height:'36px', padding:'0 12px', borderRadius:'6px', border:'1px solid hsl(240 5.9% 90%)', background:'hsl(0 0% 100%)', fontSize:'14px', color:'hsl(240 10% 3.9%)', outline:'none', cursor:'pointer' }
 
 export default function Orders() {
   const [orders, setOrders]             = useState([])
@@ -64,14 +52,9 @@ export default function Orders() {
 
   useEffect(() => { load() }, [filterStatus])
 
-  // Refresh customers setiap kali dialog dibuka
   const openAdd = async () => {
-    try {
-      const c = await getCustomers()
-      setCustomers(c.data.data ?? [])
-    } catch {}
-    setForm(EMPTY_ORDER)
-    setAddOpen(true)
+    try { const c = await getCustomers(); setCustomers(c.data.data ?? []) } catch {}
+    setForm(EMPTY_ORDER); setAddOpen(true)
   }
 
   const handleAdd = async () => {
@@ -79,211 +62,150 @@ export default function Orders() {
       return toast.error('Harap isi semua field yang wajib')
     setSaving(true)
     try {
-      await createOrder({
-        ...form,
-        customer_id: Number(form.customer_id),
-        sn_laptop: form.sn_laptop || null,
-      })
+      await createOrder({ ...form, customer_id: Number(form.customer_id), sn_laptop: form.sn_laptop || null })
       toast.success('Order berhasil dibuat!')
-      setAddOpen(false)
-      setForm(EMPTY_ORDER)
-      load()
-    } catch (err) {
-      toast.error(err.response?.data?.message ?? 'Gagal membuat order')
-    } finally { setSaving(false) }
+      setAddOpen(false); setForm(EMPTY_ORDER); load()
+    } catch (err) { toast.error(err.response?.data?.message ?? 'Gagal membuat order') }
+    finally { setSaving(false) }
   }
 
-  const openStatus = (o) => {
-    setStatusTarget(o)
-    setStatusForm({ status: o.status, diagnosa: o.diagnosa ?? '', catatan_teknisi: o.catatan_teknisi ?? '' })
-  }
+  const openStatus = (o) => { setStatusTarget(o); setStatusForm({ status: o.status, diagnosa: o.diagnosa ?? '', catatan_teknisi: o.catatan_teknisi ?? '' }) }
 
   const handleUpdateStatus = async () => {
     setSaving(true)
     try {
       await updateOrderStatus(statusTarget.id, statusForm)
       toast.success('Status berhasil diupdate!')
-      setStatusTarget(null)
-      load()
-    } catch (err) {
-      toast.error(err.response?.data?.message ?? 'Gagal update')
-    } finally { setSaving(false) }
+      setStatusTarget(null); load()
+    } catch (err) { toast.error(err.response?.data?.message ?? 'Gagal update') }
+    finally { setSaving(false) }
   }
 
   if (loading) return <LoadingPage />
 
   return (
-      <div className="space-y-5 animate-fade-in">
-        <PageHeader
-            title="Order Servis"
-            description={`${orders.length} order ditemukan`}
-            action={<Button onClick={openAdd}><Plus className="h-4 w-4" />Order Baru</Button>}
-        />
+    <div className="space-y-4">
+      <PageHeader title="Order Servis" description={`${orders.length} order`}
+        action={<Button onClick={openAdd} size="sm"><Plus className="h-4 w-4" /><span className="hidden sm:inline">Order</span> Baru</Button>} />
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <form onSubmit={e => { e.preventDefault(); load(filterStatus, search) }} className="flex gap-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input className="pl-8 w-52" placeholder="Cari order / customer..."
-                     value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
-            <Button type="submit" variant="outline" size="sm">Cari</Button>
-          </form>
-          <div className="flex gap-1 flex-wrap">
-            {STATUSES.map(s => (
-                <button key={s.value} onClick={() => setFilter(s.value)}
-                        className={cn('px-3 py-1 rounded-full text-xs font-medium border transition-colors',
-                            filterStatus === s.value
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-background border-input text-muted-foreground hover:bg-accent')}>
-                  {s.label}
-                </button>
-            ))}
+      {/* Filter status — scroll horizontal di mobile */}
+      <div className="flex gap-2 items-center overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
+        <form onSubmit={e => { e.preventDefault(); load(filterStatus, search) }} className="flex gap-2 flex-shrink-0">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input className="pl-8 w-40 md:w-52" placeholder="Cari..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
+          <Button type="submit" variant="outline" size="sm">Cari</Button>
+        </form>
+        <div className="flex gap-1 flex-shrink-0">
+          {STATUSES.map(s => (
+            <button key={s.value} onClick={() => setFilter(s.value)}
+              className={cn('px-2.5 py-1 rounded-full text-xs font-medium border transition-colors whitespace-nowrap',
+                filterStatus === s.value ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-input text-muted-foreground hover:bg-accent')}>
+              {s.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Table */}
-        <Card>
-          <CardContent className="p-0">
-            <table className="data-table">
-              <thead>
-              <tr>
-                <th>No Order</th><th>Customer</th><th>Laptop</th>
-                <th>Keluhan</th><th>Tgl Masuk</th><th>Status</th><th></th>
-              </tr>
-              </thead>
+      {/* Mobile: card list */}
+      <div className="md:hidden space-y-3">
+        {orders.length === 0
+          ? <Card className="p-8"><EmptyState icon={<ClipboardList size={36}/>} message="Tidak ada order" /></Card>
+          : orders.map(o => (
+            <Card key={o.id} className="p-4">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <span className="font-mono text-xs text-primary font-medium">{o.no_order}</span>
+                <StatusBadge status={o.status} />
+              </div>
+              <p className="font-semibold text-sm">{o.customer_nama}</p>
+              <p className="text-xs text-muted-foreground">{o.merk_laptop} {o.model_laptop}</p>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{o.keluhan}</p>
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-xs text-muted-foreground">{format(new Date(o.tanggal_masuk), 'd MMM yyyy', { locale: idLocale })}</span>
+                <Button variant="outline" size="sm" onClick={() => openStatus(o)}>Update Status</Button>
+              </div>
+            </Card>
+          ))
+        }
+      </div>
+
+      {/* Desktop: tabel */}
+      <Card className="hidden md:block">
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="data-table min-w-[650px]">
+              <thead><tr><th>No Order</th><th>Customer</th><th>Laptop</th><th>Keluhan</th><th>Tgl Masuk</th><th>Status</th><th></th></tr></thead>
               <tbody>
-              {orders.length === 0
-                  ? <tr><td colSpan={7}><EmptyState icon={<ClipboardList size={40} />} message="Tidak ada order" /></td></tr>
+                {orders.length === 0
+                  ? <tr><td colSpan={7}><EmptyState icon={<ClipboardList size={40}/>} message="Tidak ada order" /></td></tr>
                   : orders.map(o => (
-                      <tr key={o.id}>
-                        <td><span className="font-mono text-xs text-primary font-medium">{o.no_order}</span></td>
-                        <td>
-                          <p className="font-medium text-sm">{o.customer_nama}</p>
-                          <p className="text-xs text-muted-foreground">{o.customer_no_hp}</p>
-                        </td>
-                        <td className="text-sm">{o.merk_laptop} {o.model_laptop}</td>
-                        <td className="max-w-[160px]">
-                          <p className="text-xs text-muted-foreground truncate">{o.keluhan}</p>
-                        </td>
-                        <td className="text-xs text-muted-foreground">
-                          {format(new Date(o.tanggal_masuk), 'd MMM yyyy', { locale: idLocale })}
-                        </td>
-                        <td><StatusBadge status={o.status} /></td>
-                        <td>
-                          <Button variant="ghost" size="sm" onClick={() => openStatus(o)}>Update</Button>
-                        </td>
-                      </tr>
+                    <tr key={o.id}>
+                      <td><span className="font-mono text-xs text-primary font-medium">{o.no_order}</span></td>
+                      <td><p className="font-medium text-sm">{o.customer_nama}</p><p className="text-xs text-muted-foreground">{o.customer_no_hp}</p></td>
+                      <td className="text-sm">{o.merk_laptop} {o.model_laptop}</td>
+                      <td className="max-w-[160px]"><p className="text-xs text-muted-foreground truncate">{o.keluhan}</p></td>
+                      <td className="text-xs text-muted-foreground">{format(new Date(o.tanggal_masuk), 'd MMM yyyy', { locale: idLocale })}</td>
+                      <td><StatusBadge status={o.status} /></td>
+                      <td><Button variant="ghost" size="sm" onClick={() => openStatus(o)}>Update</Button></td>
+                    </tr>
                   ))
-              }
+                }
               </tbody>
             </table>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Dialog: Tambah Order */}
-        <Dialog open={addOpen} onOpenChange={v => { if (!v) { setAddOpen(false); setForm(EMPTY_ORDER) } }}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader><DialogTitle>Order Servis Baru</DialogTitle></DialogHeader>
-            <div className="space-y-4 py-2">
-
-              {/* Native select — tidak konflik dengan Dialog */}
-              <FormField label="Customer" required>
-                <select
-                    style={nativeSelectStyle}
-                    value={form.customer_id}
-                    onChange={e => setForm(f => ({ ...f, customer_id: e.target.value }))}
-                >
-                  <option value="">-- Pilih Customer --</option>
-                  {customers.map(c => (
-                      <option key={c.id} value={String(c.id)}>
-                        {c.nama} — {c.no_hp}
-                      </option>
-                  ))}
-                </select>
-                {customers.length === 0 && (
-                    <p className="text-xs text-amber-600 mt-1">
-                      Belum ada customer. Tambahkan di menu Customer terlebih dahulu.
-                    </p>
-                )}
-              </FormField>
-
-              <div className="grid grid-cols-2 gap-3">
-                <FormField label="Merk" required>
-                  <Input placeholder="ASUS, Lenovo, HP..."
-                         value={form.merk_laptop}
-                         onChange={e => setForm(f => ({ ...f, merk_laptop: e.target.value }))} />
-                </FormField>
-                <FormField label="Model" required>
-                  <Input placeholder="VivoBook 14..."
-                         value={form.model_laptop}
-                         onChange={e => setForm(f => ({ ...f, model_laptop: e.target.value }))} />
-                </FormField>
-              </div>
-
-              <FormField label="Serial Number" hint="Opsional">
-                <Input className="font-mono text-sm" placeholder="SN/IMEI..."
-                       value={form.sn_laptop}
-                       onChange={e => setForm(f => ({ ...f, sn_laptop: e.target.value }))} />
-              </FormField>
-
-              <FormField label="Keluhan" required>
-                <Textarea placeholder="Deskripsi keluhan customer..." className="h-24"
-                          value={form.keluhan}
-                          onChange={e => setForm(f => ({ ...f, keluhan: e.target.value }))} />
-              </FormField>
+      {/* Dialog: Tambah Order */}
+      <Dialog open={addOpen} onOpenChange={v => { if (!v) { setAddOpen(false); setForm(EMPTY_ORDER) } }}>
+        <DialogContent className="max-w-lg mx-4 md:mx-auto">
+          <DialogHeader><DialogTitle>Order Servis Baru</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <FormField label="Customer" required>
+              <select style={selectStyle} value={form.customer_id} onChange={e => setForm(f => ({ ...f, customer_id: e.target.value }))}>
+                <option value="">-- Pilih Customer --</option>
+                {customers.map(c => <option key={c.id} value={String(c.id)}>{c.nama} — {c.no_hp}</option>)}
+              </select>
+              {customers.length === 0 && <p className="text-xs text-amber-600 mt-1">Belum ada customer. Tambahkan di menu Customer.</p>}
+            </FormField>
+            <div className="grid grid-cols-2 gap-3">
+              <FormField label="Merk" required><Input placeholder="ASUS, Lenovo..." value={form.merk_laptop} onChange={e => setForm(f => ({ ...f, merk_laptop: e.target.value }))} /></FormField>
+              <FormField label="Model" required><Input placeholder="VivoBook 14..." value={form.model_laptop} onChange={e => setForm(f => ({ ...f, model_laptop: e.target.value }))} /></FormField>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setAddOpen(false); setForm(EMPTY_ORDER) }}>Batal</Button>
-              <Button onClick={handleAdd} disabled={saving}>
-                {saving && <Spinner className="h-4 w-4" />}
-                {saving ? 'Menyimpan...' : 'Simpan Order'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <FormField label="Serial Number" hint="Opsional"><Input className="font-mono text-sm" placeholder="SN/IMEI..." value={form.sn_laptop} onChange={e => setForm(f => ({ ...f, sn_laptop: e.target.value }))} /></FormField>
+            <FormField label="Keluhan" required><Textarea placeholder="Deskripsi keluhan customer..." className="h-24" value={form.keluhan} onChange={e => setForm(f => ({ ...f, keluhan: e.target.value }))} /></FormField>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setAddOpen(false); setForm(EMPTY_ORDER) }}>Batal</Button>
+            <Button onClick={handleAdd} disabled={saving}>{saving && <Spinner className="h-4 w-4" />}{saving ? 'Menyimpan...' : 'Simpan Order'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        {/* Dialog: Update Status */}
-        <Dialog open={!!statusTarget} onOpenChange={v => !v && setStatusTarget(null)}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Update Status</DialogTitle>
-              <p className="text-xs text-muted-foreground font-mono mt-1">{statusTarget?.no_order}</p>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <FormField label="Status Baru" required>
-                <select
-                    style={nativeSelectStyle}
-                    value={statusForm.status}
-                    onChange={e => setStatusForm(f => ({ ...f, status: e.target.value }))}
-                >
-                  <option value="">-- Pilih Status --</option>
-                  {STATUSES.filter(s => s.value).map(s => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
-              </FormField>
-              <FormField label="Hasil Diagnosa">
-                <Textarea placeholder="Temuan setelah diperiksa..." className="h-20"
-                          value={statusForm.diagnosa}
-                          onChange={e => setStatusForm(f => ({ ...f, diagnosa: e.target.value }))} />
-              </FormField>
-              <FormField label="Catatan Teknisi">
-                <Textarea placeholder="Catatan pengerjaan..." className="h-20"
-                          value={statusForm.catatan_teknisi}
-                          onChange={e => setStatusForm(f => ({ ...f, catatan_teknisi: e.target.value }))} />
-              </FormField>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setStatusTarget(null)}>Batal</Button>
-              <Button onClick={handleUpdateStatus} disabled={saving}>
-                {saving && <Spinner className="h-4 w-4" />}
-                {saving ? 'Menyimpan...' : 'Simpan'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+      {/* Dialog: Update Status */}
+      <Dialog open={!!statusTarget} onOpenChange={v => !v && setStatusTarget(null)}>
+        <DialogContent className="max-w-md mx-4 md:mx-auto">
+          <DialogHeader>
+            <DialogTitle>Update Status</DialogTitle>
+            <p className="text-xs text-muted-foreground font-mono mt-1">{statusTarget?.no_order}</p>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <FormField label="Status Baru" required>
+              <select style={selectStyle} value={statusForm.status} onChange={e => setStatusForm(f => ({ ...f, status: e.target.value }))}>
+                <option value="">-- Pilih Status --</option>
+                {STATUSES.filter(s => s.value).map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </FormField>
+            <FormField label="Hasil Diagnosa"><Textarea placeholder="Temuan setelah diperiksa..." className="h-20" value={statusForm.diagnosa} onChange={e => setStatusForm(f => ({ ...f, diagnosa: e.target.value }))} /></FormField>
+            <FormField label="Catatan Teknisi"><Textarea placeholder="Catatan pengerjaan..." className="h-20" value={statusForm.catatan_teknisi} onChange={e => setStatusForm(f => ({ ...f, catatan_teknisi: e.target.value }))} /></FormField>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setStatusTarget(null)}>Batal</Button>
+            <Button onClick={handleUpdateStatus} disabled={saving}>{saving && <Spinner className="h-4 w-4" />}{saving ? 'Menyimpan...' : 'Simpan'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }

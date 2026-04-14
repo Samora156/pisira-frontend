@@ -114,7 +114,7 @@ export default function Invoices() {
 
       <Card>
         <CardContent className="p-0">
-          <table className="data-table">
+          <div className="overflow-x-auto"><table className="data-table min-w-[700px]">
             <thead><tr>
               <th>No Invoice</th><th>No Order</th><th>Customer</th>
               <th>Total</th><th>Metode</th><th>Tanggal</th><th>Status</th><th></th>
@@ -152,7 +152,7 @@ export default function Invoices() {
                 ))
               }
             </tbody>
-          </table>
+          </table></div>
         </CardContent>
       </Card>
 
