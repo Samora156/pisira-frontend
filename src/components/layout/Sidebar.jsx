@@ -27,7 +27,7 @@ function NavLinks({ onClose, isAdmin, user, onLogout }) {
       {/* Brand */}
       <div className="flex h-14 items-center gap-2.5 border-b px-4 flex-shrink-0">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-          <img src={Logo} alt="Logo" className="h-3.5 w-3.5 text-primary-foreground" />
+          <img src={Logo} alt="Logo"/>
         </div>
         <div className="flex-1">
           <p className="text-sm font-bold leading-none">PISIRA</p>
