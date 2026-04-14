@@ -26,13 +26,7 @@ function NavLinks({ onClose, isAdmin, user, onLogout }) {
     <>
       {/* Brand */}
       <div className="flex h-14 items-center gap-2.5 border-b px-4 flex-shrink-0">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
           <img src={Logo} alt="Logo"/>
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-bold leading-none">PISIRA</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Service Laptop</p>
-        </div>
         {onClose && (
           <button onClick={onClose} className="md:hidden p-1 rounded-md hover:bg-accent">
             <X className="h-5 w-5 text-muted-foreground" />
@@ -106,11 +100,8 @@ export default function Sidebar() {
           <Menu className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-            <img src={Logo} alt="Logo" className="h-3 w-3 text-primary-foreground" />
-          </div>
-          <p className="text-sm font-bold">PISIRA</p>
-        </div>
+            <img src={Logo} alt="Logo" className="w-20 text-primary-foreground" />
+        </div>  
       </header>
 
       {/* Mobile overlay */}
