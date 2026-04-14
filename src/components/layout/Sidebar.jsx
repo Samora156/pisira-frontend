@@ -107,7 +107,7 @@ export default function Sidebar() {
         </button>
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-            <Wrench className="h-3 w-3 text-primary-foreground" />
+            <img src={Logo} alt="Logo" className="h-3 w-3 text-primary-foreground" />
           </div>
           <p className="text-sm font-bold">PISIRA</p>
         </div>
